@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mišji izzivi</title>
+  <style>
+    :root {
+      --ink: #1b2b43;
+      --muted: #607087;
+      --blue: #315fbd;
+      --blue-dark: #24488e;
+      --blue-soft: #e8f0ff;
+      --line: #d6e0ed;
+      --panel: #ffffff;
+      --good: #257142;
+      --good-bg: #e7f6ec;
+      --bad: #a13d29;
+      --bad-bg: #fff0eb;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 34px 18px;
+      background: #eef3f9;
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    button { font: inherit; }
+    [hidden] { display: none !important; }
+
+    .app {
+      width: min(1080px, 100%);
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      gap: 20px;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 26px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(32px, 5vw, 48px);
+      line-height: 1.08;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.5;
+    }
+
+    .total-score {
+      flex: 0 0 auto;
+      padding: 12px 16px;
+      border: 1px solid #cdd9e9;
+      border-radius: 12px;
+      background: #fff;
+      color: #42536d;
+      font-weight: 700;
+    }
+
+    .settings-panel {
+      margin-bottom: 22px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(35, 57, 91, 0.05);
+    }
+
+    .settings-panel h2 {
+      margin: 0 0 16px;
+      font-size: 22px;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .setting-field {
+      display: flex;
+      gap: 7px;
+      flex-direction: column;
+      color: #40516a;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .setting-field input,
+    .setting-field select,
+    .teacher-settings textarea {
+      width: 100%;
+      border: 1px solid #b9c8dc;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font: 16px Arial, sans-serif;
+    }
+
+    .setting-field input,
+    .setting-field select { height: 44px; padding: 0 11px; }
+
+    .setting-field input:focus,
+    .setting-field select:focus,
+    .teacher-settings textarea:focus {
+      border-color: #5c7dc8;
+      outline: 3px solid #d4e0fa;
+    }
+
+    .teacher-settings {
+      margin-top: 16px;
+      border-top: 1px solid #e0e7f0;
+      padding-top: 14px;
+    }
+
+    .teacher-settings summary {
+      color: #354c6c;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .teacher-settings p {
+      margin: 10px 0 8px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .teacher-settings textarea {
+      min-height: 115px;
+      padding: 11px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .sentence-count {
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .game-card {
+      display: flex;
+      min-height: 210px;
+      padding: 20px;
+      flex-direction: column;
+      align-items: flex-start;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: var(--panel);
+      box-shadow: 0 8px 24px rgba(35, 57, 91, 0.06);
+    }
+
+    .card-number {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      margin-bottom: 15px;
+      place-items: center;
+      border-radius: 12px;
+      background: var(--blue-soft);
+      color: var(--blue-dark);
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .game-card h2 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      line-height: 1.25;
+    }
+
+    .game-card p {
+      margin: 0 0 17px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .card-bottom {
+      display: flex;
+      width: 100%;
+      margin-top: auto;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-score { color: var(--muted); font-size: 13px; }
+
+    .primary,
+    .secondary {
+      border-radius: 9px;
+      padding: 11px 17px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .primary {
+      border: 0;
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .primary:hover { background: var(--blue-dark); }
+
+    .secondary {
+      border: 1px solid #b9c8dc;
+      background: #fff;
+      color: #344a69;
+    }
+
+    .secondary:hover { background: #f4f7fb; }
+
+    button:focus-visible {
+      outline: 3px solid #91ace8;
+      outline-offset: 3px;
+    }
+
+    .game-shell {
+      padding: clamp(20px, 4vw, 38px);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #fff;
+      box-shadow: 0 14px 38px rgba(31, 53, 88, 0.08);
+    }
+
+    .session-meta {
+      display: flex;
+      margin-bottom: 19px;
+      padding: 10px 13px;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+      border: 1px solid #d7e1ee;
+      border-radius: 10px;
+      background: #f8fafd;
+      color: #53647c;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .timer.warning { color: #b24b2f; }
+
+    .mixed-label {
+      display: inline-block;
+      margin: 0 0 10px;
+      padding: 6px 10px;
+      border-radius: 7px;
+      background: #f0e8ff;
+      color: #69439b;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .game-head {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .game-head h2 {
+      margin: 0 0 6px;
+      font-size: clamp(24px, 4vw, 34px);
+    }
+
+    .game-head p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .instruction {
+      margin-bottom: 22px;
+      padding: 16px 18px;
+      border-radius: 12px;
+      background: #f3f6fb;
+      font-size: 19px;
+      line-height: 1.55;
+    }
+
+    .target-pill {
+      display: inline-block;
+      margin: 0 3px;
+      padding: 2px 10px;
+      border-radius: 7px;
+      background: #dce8ff;
+      color: #21478f;
+      font-weight: 800;
+    }
+
+    .play-area {
+      min-height: 245px;
+      padding: 22px;
+      border: 2px solid #b8c7db;
+      border-radius: 13px;
+      background: #fdfefe;
+    }
+
+    .text-editor {
+      min-height: 175px;
+      padding: 21px;
+      border: 1px solid #cfdae8;
+      border-radius: 9px;
+      background: #fff;
+      font-size: clamp(22px, 3vw, 28px);
+      line-height: 2;
+      cursor: text;
+      user-select: text;
+    }
+
+    .text-editor::selection,
+    .text-editor *::selection {
+      background: #9fc0ff;
+      color: #102b5a;
+    }
+
+    .word { white-space: nowrap; }
+
+    .caret-editor {
+      display: flex;
+      min-height: 170px;
+      padding: 25px 15px;
+      flex-wrap: wrap;
+      align-content: center;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9px;
+      background: #fff;
+      font-size: clamp(22px, 3vw, 29px);
+      line-height: 1.9;
+    }
+
+    .caret-word { padding: 3px 0; }
+
+    .gap {
+      position: relative;
+      width: 15px;
+      height: 42px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: text;
+    }
+
+    .gap::after {
+      position: absolute;
+      top: 6px;
+      bottom: 6px;
+      left: 6px;
+      width: 2px;
+      border-radius: 2px;
+      background: transparent;
+      content: "";
+    }
+
+    .gap:hover::after { background: #9bb5e9; }
+    .gap.correct::after { background: var(--good); }
+
+    .double-word {
+      display: inline-block;
+      padding: 1px 2px;
+      border-radius: 4px;
+      cursor: default;
+    }
+
+    .double-word:hover { background: #edf3ff; }
+    .double-word.correct { background: var(--good-bg); color: var(--good); }
+
+    .drop-zone {
+      display: inline-flex;
+      min-width: 110px;
+      min-height: 45px;
+      margin: 0 7px;
+      padding: 4px 10px;
+      align-items: center;
+      justify-content: center;
+      vertical-align: middle;
+      border: 2px dashed #5277c6;
+      border-radius: 9px;
+      background: var(--blue-soft);
+      color: #2a55ad;
+      font: 800 12px/1.2 Arial, sans-serif;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+      user-select: none;
+    }
+
+    .drop-zone.ready {
+      border-style: solid;
+      background: #d5e4ff;
+      box-shadow: 0 0 0 4px rgba(82, 119, 198, .17);
+    }
+
+    .drop-zone.done {
+      border: 2px solid #4b9a65;
+      background: var(--good-bg);
+      color: var(--good);
+      font-size: 18px;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .source-moved {
+      color: #8793a6;
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+    }
+
+    .scroll-editor {
+      height: 220px;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+    }
+
+    .scroll-editor p {
+      margin: 0 0 18px;
+      font-size: 20px;
+      line-height: 1.7;
+    }
+
+    .order-label {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .word-bank,
+    .word-slots {
+      display: flex;
+      min-height: 78px;
+      padding: 13px;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      border-radius: 10px;
+    }
+
+    .word-bank {
+      margin-bottom: 24px;
+      border: 1px solid #d4deec;
+      background: #f4f7fb;
+    }
+
+    .word-card {
+      padding: 11px 14px;
+      border: 1px solid #8fa8d4;
+      border-radius: 8px;
+      background: #fff;
+      color: #244a91;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .word-card:active { cursor: grabbing; }
+
+    .word-slots {
+      border: 1px dashed #9db1cf;
+      background: #fbfcfe;
+    }
+
+    .word-slot {
+      display: inline-flex;
+      min-width: 85px;
+      min-height: 49px;
+      padding: 7px 10px;
+      align-items: center;
+      justify-content: center;
+      border: 2px dashed #b4c4da;
+      border-radius: 8px;
+      color: #8a98aa;
+      font-size: 14px;
+      user-select: none;
+    }
+
+    .word-slot.ready { border-color: #5277c6; background: var(--blue-soft); }
+    .word-slot.filled {
+      border: 2px solid #69a17a;
+      background: var(--good-bg);
+      color: var(--good);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .feedback {
+      min-height: 62px;
+      margin: 20px 0 14px;
+      padding: 16px;
+      border-radius: 10px;
+      background: #f1f4f8;
+      color: #536178;
+      font-size: 19px;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .feedback.good { background: var(--good-bg); color: var(--good); }
+    .feedback.bad { background: var(--bad-bg); color: var(--bad); }
+
+    .game-footer {
+      display: flex;
+      min-height: 47px;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .game-score { color: var(--muted); font-size: 14px; }
+
+    .result-panel {
+      padding: clamp(22px, 5vw, 46px);
+      border: 2px solid #bdd0ea;
+      border-radius: 15px;
+      background: #f8fbff;
+      text-align: center;
+    }
+
+    .result-panel h3 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 5vw, 39px);
+    }
+
+    .result-name {
+      margin: 0 0 23px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .result-grid {
+      display: grid;
+      max-width: 660px;
+      margin: 0 auto 25px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 11px;
+    }
+
+    .result-item {
+      padding: 16px 8px;
+      border: 1px solid #d7e1ee;
+      border-radius: 11px;
+      background: #fff;
+    }
+
+    .result-item strong {
+      display: block;
+      margin-bottom: 5px;
+      color: #294f99;
+      font-size: 25px;
+    }
+
+    .result-item span { color: var(--muted); font-size: 13px; }
+
+    .result-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 11px;
+      justify-content: center;
+    }
+
+    body[data-difficulty="easy"] .text-editor { font-size: clamp(26px, 3.5vw, 31px); }
+    body[data-difficulty="easy"] .gap { width: 24px; }
+    body[data-difficulty="easy"] .drop-zone { min-width: 135px; min-height: 52px; }
+    body[data-difficulty="easy"] .word-card { padding: 14px 17px; font-size: 20px; }
+
+    body[data-difficulty="hard"] .text-editor { font-size: clamp(19px, 2.4vw, 23px); }
+    body[data-difficulty="hard"] .gap { width: 9px; }
+    body[data-difficulty="hard"] .drop-zone { min-width: 82px; min-height: 38px; }
+    body[data-difficulty="hard"] .word-card { padding: 8px 11px; font-size: 16px; }
+
+    @media (max-width: 900px) {
+      .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .settings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 560px) {
+      body { padding: 22px 11px; }
+      .topbar, .game-head { align-items: flex-start; flex-direction: column; }
+      .menu-grid { grid-template-columns: 1fr; }
+      .settings-grid, .result-grid { grid-template-columns: 1fr 1fr; }
+      .game-card { min-height: 185px; }
+      .play-area { padding: 14px; }
+      .text-editor { min-height: 200px; padding: 16px; }
+      .drop-zone { min-width: 92px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <h1>Mišji izzivi</h1>
+        <p class="subtitle">Izberi vajo in izboljšaj svoje delo z miško.</p>
+      </div>
+      <div class="total-score" id="totalScore">Skupaj pravilno: 0</div>
+    </header>
+
+    <section id="menuView" aria-label="Izbira igre">
+      <div class="settings-panel">
+        <h2>Nastavitve igre</h2>
+        <div class="settings-grid">
+          <label class="setting-field">Ime učenca
+            <input id="playerName" type="text" maxlength="30" placeholder="Igralec">
+          </label>
+          <label class="setting-field">Težavnost
+            <select id="difficulty">
+              <option value="easy">Lahka</option>
+              <option value="medium" selected>Srednja</option>
+              <option value="hard">Težka</option>
+            </select>
+          </label>
+          <label class="setting-field">Način
+            <select id="playMode">
+              <option value="practice" selected>Vadba z namigi</option>
+              <option value="assessment">Preverjanje brez namigov</option>
+            </select>
+          </label>
+          <label class="setting-field">Čas
+            <select id="timeMode">
+              <option value="0" selected>Brez omejitve</option>
+              <option value="120">Časovni izziv: 2 minuti</option>
+            </select>
+          </label>
+        </div>
+
+        <details class="teacher-settings">
+          <summary>Učiteljski način – dodaj svoje povedi</summary>
+          <p>Vsako poved napiši v svojo vrstico. Uporabljene bodo skupaj z že pripravljenimi povedmi.</p>
+          <textarea id="customSentences" placeholder="Danes smo v računalniški učilnici ustvarjali animacije.&#10;Učenci so varno shranili svoje datoteke."></textarea>
+          <span class="sentence-count" id="sentenceCount">Dodanih povedi: 0</span>
+        </details>
+      </div>
+      <div class="menu-grid" id="menuGrid"></div>
+    </section>
+
+    <section id="gameView" class="game-shell" hidden>
+      <div class="game-head">
+        <div>
+          <h2 id="gameTitle"></h2>
+          <p id="gameDescription"></p>
+        </div>
+        <button class="secondary" id="menuButton" type="button">Nazaj na izbiro</button>
+      </div>
+
+      <div class="session-meta" id="sessionMeta">
+        <span id="playerDisplay"></span>
+        <span id="progressDisplay"></span>
+        <span id="errorsDisplay"></span>
+        <span class="timer" id="timerDisplay"></span>
+      </div>
+
+      <div id="taskContent">
+        <div class="mixed-label" id="mixedLabel" hidden></div>
+        <div class="instruction" id="instruction"></div>
+        <div class="play-area" id="playArea"></div>
+        <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+
+        <div class="game-footer">
+          <button class="primary" id="nextTaskButton" type="button" hidden>Naslednja naloga</button>
+          <span class="game-score" id="gameScore"></span>
+        </div>
+      </div>
+
+      <div class="result-panel" id="resultPanel" hidden>
+        <h3 id="resultTitle">Rezultat</h3>
+        <p class="result-name" id="resultName"></p>
+        <div class="result-grid">
+          <div class="result-item"><strong id="resultCorrect">0/10</strong><span>pravilno</span></div>
+          <div class="result-item"><strong id="resultErrors">0</strong><span>napak</span></div>
+          <div class="result-item"><strong id="resultPercent">0 %</strong><span>uspešnost</span></div>
+          <div class="result-item"><strong id="resultTime">–</strong><span>preostali čas</span></div>
+        </div>
+        <div class="result-actions">
+          <button class="primary" id="repeatButton" type="button">Ponovi vajo</button>
+          <button class="secondary" id="resultMenuButton" type="button">Nazaj na izbiro</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    'use strict';
+
+    const sentences = [
+      'Naša mačka rada spi na mehkem kavču.',
+      'Na šolskem vrtu rastejo pisane rože.',
+      'Luka je v knjižnici izbral zanimivo knjigo.',
+      'Po dežju se je na nebu pojavila mavrica.',
+      'Učenci so na igrišču igrali košarko.',
+      'Moja sestra vsak večer posluša glasbo.',
+      'V gozdu smo opazili majhno veverico.',
+      'Babica je za kosilo skuhala okusno juho.',
+      'Na izlet smo vzeli vodo in sendviče.',
+      'Zjutraj je pred hišo zapadel prvi sneg.',
+      'Peter je prijatelju pokazal novo kolo.',
+      'Čez most je počasi zapeljal moder avtobus.',
+      'Na travniku se pasejo ovce in koze.',
+      'Nina je narisala hišo z velikimi okni.',
+      'Veter je po dvorišču raznašal suho listje.',
+      'Na morju smo zgradili velik peščeni grad.',
+      'Učiteljica je na tablo napisala novo nalogo.',
+      'Zvečer na nebu zasijejo svetle zvezde.',
+      'V kuhinji diši po sveže pečenem kruhu.',
+      'Maja je skrbno zalila rastline na balkonu.'
+    ];
+
+    const phraseTasks = [
+      { sentence: 'Na šolskem vrtu rastejo pisane rože.', phrase: 'Na šolskem vrtu' },
+      { sentence: 'Luka je v knjižnici izbral zanimivo knjigo.', phrase: 'v knjižnici izbral' },
+      { sentence: 'Po dežju se je na nebu pojavila mavrica.', phrase: 'na nebu pojavila' },
+      { sentence: 'Učenci so na igrišču igrali košarko.', phrase: 'na igrišču igrali' },
+      { sentence: 'Moja sestra vsak večer posluša glasbo.', phrase: 'vsak večer posluša' },
+      { sentence: 'V gozdu smo opazili majhno veverico.', phrase: 'opazili majhno veverico' },
+      { sentence: 'Babica je za kosilo skuhala okusno juho.', phrase: 'za kosilo skuhala' },
+      { sentence: 'Zjutraj je pred hišo zapadel prvi sneg.', phrase: 'pred hišo zapadel' },
+      { sentence: 'Čez most je počasi zapeljal moder avtobus.', phrase: 'počasi zapeljal moder' },
+      { sentence: 'Na morju smo zgradili velik peščeni grad.', phrase: 'velik peščeni grad' }
+    ];
+
+    const orderTasks = [
+      ['Mačka', 'spi', 'na', 'mehkem', 'kavču'],
+      ['Učenci', 'igrajo', 'košarko', 'na', 'igrišču'],
+      ['Maja', 'zaliva', 'rože', 'na', 'balkonu'],
+      ['Peter', 'bere', 'zanimivo', 'knjigo'],
+      ['Na', 'nebu', 'sijejo', 'svetle', 'zvezde'],
+      ['Veverica', 'skače', 'po', 'visokih', 'vejah'],
+      ['Babica', 'kuha', 'okusno', 'zelenjavno', 'juho'],
+      ['Avtobus', 'počasi', 'pelje', 'čez', 'most']
+    ];
+
+    const scrollTargets = [
+      { sentence: 'Na robu gozda smo nenadoma opazili majhno veverico.', word: 'veverico' },
+      { sentence: 'Po močnem dežju se je nad vasjo prikazala mavrica.', word: 'mavrica' },
+      { sentence: 'Na železniško postajo je pripeljal modri vlak.', word: 'železniško' },
+      { sentence: 'V starem gradu smo občudovali viteški oklep.', word: 'viteški' },
+      { sentence: 'Na balkonu je zacvetela rumena sončnica.', word: 'sončnica' },
+      { sentence: 'Med kamenjem ob potoku se je skrivala žaba.', word: 'kamenjem' }
+    ];
+
+    const baseGameDefinitions = [
+      { id: 'caret', title: 'Postavi kazalec', description: 'Natančno klikni med zahtevani besedi.', setup: setupCaretGame },
+      { id: 'word', title: 'Označi besedo', description: 'Z vlečenjem označi eno besedo.', setup: setupWordSelection },
+      { id: 'phrase', title: 'Označi besedno zvezo', description: 'Označi več zaporednih besed.', setup: setupPhraseSelection },
+      { id: 'range', title: 'Označi od – do', description: 'Označi besedilo od prve do zadnje besede.', setup: setupRangeSelection },
+      { id: 'double', title: 'Dvoklikni besedo', description: 'Z dvoklikom izberi zahtevano besedo.', setup: setupDoubleClick },
+      { id: 'move', title: 'Prestavi besedo', description: 'Označi besedo in jo povleci na novo mesto.', setup: setupMoveWord },
+      { id: 'scroll', title: 'Poišči z drsenjem', description: 'Pomakni besedilo in poišči skrito besedo.', setup: setupScrollSelection },
+      { id: 'order', title: 'Uredi vrstni red', description: 'Z vlečenjem sestavi pravilno poved.', setup: setupWordOrder }
+    ];
+
+    const gameDefinitions = [
+      ...baseGameDefinitions,
+      { id: 'mix', title: 'Veliki izziv', description: 'Deset nalog, ki mešajo vseh osem mišjih spretnosti.', setup: setupMixedGame }
+    ];
+
+    const menuView = document.getElementById('menuView');
+    const gameView = document.getElementById('gameView');
+    const menuGrid = document.getElementById('menuGrid');
+    const gameTitle = document.getElementById('gameTitle');
+    const gameDescription = document.getElementById('gameDescription');
+    const instruction = document.getElementById('instruction');
+    const playArea = document.getElementById('playArea');
+    const feedback = document.getElementById('feedback');
+    const nextTaskButton = document.getElementById('nextTaskButton');
+    const menuButton = document.getElementById('menuButton');
+    const totalScore = document.getElementById('totalScore');
+    const gameScore = document.getElementById('gameScore');
+    const playerNameInput = document.getElementById('playerName');
+    const difficultySelect = document.getElementById('difficulty');
+    const playModeSelect = document.getElementById('playMode');
+    const timeModeSelect = document.getElementById('timeMode');
+    const customSentencesInput = document.getElementById('customSentences');
+    const sentenceCount = document.getElementById('sentenceCount');
+    const taskContent = document.getElementById('taskContent');
+    const resultPanel = document.getElementById('resultPanel');
+    const playerDisplay = document.getElementById('playerDisplay');
+    const progressDisplay = document.getElementById('progressDisplay');
+    const errorsDisplay = document.getElementById('errorsDisplay');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const mixedLabel = document.getElementById('mixedLabel');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultName = document.getElementById('resultName');
+    const resultCorrect = document.getElementById('resultCorrect');
+    const resultErrors = document.getElementById('resultErrors');
+    const resultPercent = document.getElementById('resultPercent');
+    const resultTime = document.getElementById('resultTime');
+    const repeatButton = document.getElementById('repeatButton');
+    const resultMenuButton = document.getElementById('resultMenuButton');
+
+    const scores = Object.fromEntries(gameDefinitions.map(game => [game.id, 0]));
+    let activeGame = null;
+    let solved = false;
+    let totalSolved = 0;
+    let totalErrors = 0;
+    let sessionSolved = 0;
+    let sessionErrors = 0;
+    let sessionTarget = 10;
+    let currentConfig = null;
+    let timerId = null;
+    let timeRemaining = 0;
+    let mixedDeck = [];
+
+    function shuffle(items) {
+      const copy = [...items];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function randomItem(items) {
+      return items[Math.floor(Math.random() * items.length)];
+    }
+
+    function wordsIn(sentence) {
+      return [...sentence.matchAll(/[A-Za-zČŠŽčšž]+/g)].map((match, index) => ({
+        text: match[0],
+        start: match.index,
+        end: match.index + match[0].length,
+        index
+      }));
+    }
+
+    function normalizeText(text) {
+      return text.trim().replace(/\s+/g, ' ');
+    }
+
+    function getCustomSentences() {
+      return customSentencesInput.value
+        .split(/\r?\n/)
+        .map(sentence => sentence.trim())
+        .filter(sentence => wordsIn(sentence).length >= 4);
+    }
+
+    function getSentencePool() {
+      return [...sentences, ...getCustomSentences()];
+    }
+
+    function createPhraseFromSentence(sentence) {
+      const words = wordsIn(sentence);
+      if (words.length < 3) return null;
+      const wantedLength = currentConfig?.difficulty === 'hard' ? Math.min(4, words.length) :
+        currentConfig?.difficulty === 'easy' ? 2 : Math.min(3, words.length);
+      const start = Math.floor(Math.random() * (words.length - wantedLength + 1));
+      const first = words[start];
+      const last = words[start + wantedLength - 1];
+      return { sentence, phrase: sentence.slice(first.start, last.end) };
+    }
+
+    function getPhrasePool() {
+      const customTasks = getCustomSentences().map(createPhraseFromSentence).filter(Boolean);
+      return [...phraseTasks, ...customTasks];
+    }
+
+    function getOrderPool() {
+      const maximum = currentConfig?.difficulty === 'easy' ? 5 :
+        currentConfig?.difficulty === 'hard' ? 8 : 6;
+      const customOrders = getCustomSentences()
+        .map(sentence => wordsIn(sentence).map(word => word.text).slice(0, maximum))
+        .filter(words => words.length >= 4 && new Set(words).size === words.length);
+      const standard = orderTasks.filter(words => {
+        if (currentConfig?.difficulty === 'easy') return words.length <= 5;
+        return true;
+      });
+      return [...standard, ...customOrders];
+    }
+
+    function getScrollTargets() {
+      const customTargets = getCustomSentences().map(sentence => {
+        const candidates = wordsIn(sentence).filter(word => word.text.length >= 5);
+        if (candidates.length === 0) return null;
+        return { sentence, word: randomItem(candidates).text };
+      }).filter(Boolean);
+      return [...scrollTargets, ...customTargets];
+    }
+
+    function readConfiguration() {
+      const name = playerNameInput.value.trim() || 'Igralec';
+      return {
+        name,
+        difficulty: difficultySelect.value,
+        mode: playModeSelect.value,
+        seconds: Number(timeModeSelect.value)
+      };
+    }
+
+    function saveSettings() {
+      try {
+        localStorage.setItem('misjiIzziviSettings', JSON.stringify({
+          name: playerNameInput.value,
+          difficulty: difficultySelect.value,
+          mode: playModeSelect.value,
+          seconds: timeModeSelect.value,
+          customSentences: customSentencesInput.value
+        }));
+      } catch (error) {
+        // Igra deluje tudi, če brskalnik ne dovoli lokalnega shranjevanja.
+      }
+    }
+
+    function loadSettings() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('misjiIzziviSettings') || 'null');
+        if (!saved) return;
+        playerNameInput.value = saved.name || '';
+        difficultySelect.value = saved.difficulty || 'medium';
+        playModeSelect.value = saved.mode || 'practice';
+        timeModeSelect.value = saved.seconds || '0';
+        customSentencesInput.value = saved.customSentences || '';
+      } catch (error) {
+        // Neveljavne shranjene nastavitve se preprosto prezrejo.
+      }
+    }
+
+    function updateSentenceCount() {
+      sentenceCount.textContent = 'Dodanih povedi: ' + getCustomSentences().length;
+    }
+
+    function formatTime(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const rest = String(seconds % 60).padStart(2, '0');
+      return minutes + ':' + rest;
+    }
+
+    function updateSessionMeta() {
+      if (!currentConfig) return;
+      playerDisplay.textContent = 'Igralec: ' + currentConfig.name;
+      progressDisplay.textContent = 'Naloga: ' + Math.min(sessionSolved + 1, sessionTarget) + '/' + sessionTarget;
+      errorsDisplay.textContent = 'Napake: ' + sessionErrors;
+      timerDisplay.classList.toggle('warning', currentConfig.seconds > 0 && timeRemaining <= 20);
+      timerDisplay.textContent = currentConfig.seconds > 0 ?
+        'Čas: ' + formatTime(timeRemaining) : 'Brez časovne omejitve';
+    }
+
+    function stopTimer() {
+      if (timerId !== null) {
+        window.clearInterval(timerId);
+        timerId = null;
+      }
+    }
+
+    function startTimer() {
+      stopTimer();
+      timeRemaining = currentConfig.seconds;
+      updateSessionMeta();
+      if (currentConfig.seconds === 0) return;
+      timerId = window.setInterval(() => {
+        timeRemaining -= 1;
+        updateSessionMeta();
+        if (timeRemaining <= 0) finishSession(true);
+      }, 1000);
+    }
+
+    function setInstruction(html) {
+      instruction.innerHTML = html;
+    }
+
+    function setFeedback(message, kind = '') {
+      feedback.textContent = message;
+      feedback.className = 'feedback' + (kind ? ' ' + kind : '');
+    }
+
+    function updateScores() {
+      totalScore.textContent = 'Skupaj: ' + totalSolved + ' pravilno, ' + totalErrors + ' napak';
+      if (activeGame) {
+        gameScore.textContent = 'Težavnost: ' + difficultyLabel(currentConfig?.difficulty);
+      }
+      document.querySelectorAll('[data-card-score]').forEach(element => {
+        element.textContent = 'Pravilno: ' + scores[element.dataset.cardScore];
+      });
+    }
+
+    function finishTask(message = '') {
+      if (solved) return;
+      solved = true;
+      totalSolved += 1;
+      sessionSolved += 1;
+      scores[activeGame.id] += 1;
+      const praise = ['Odlično!', 'Bravo!', 'Pravilno!', 'Zelo dobro!'];
+      setFeedback(message || randomItem(praise), 'good');
+      nextTaskButton.hidden = false;
+      nextTaskButton.textContent = sessionSolved >= sessionTarget ? 'Prikaži rezultat' : 'Naslednja naloga';
+      if (sessionSolved >= sessionTarget) stopTimer();
+      updateSessionMeta();
+      updateScores();
+    }
+
+    function wrong(message = 'Poskusi znova.') {
+      if (solved) return;
+      sessionErrors += 1;
+      totalErrors += 1;
+      const shownMessage = currentConfig?.mode === 'assessment' ? 'Odgovor ni pravilen.' : message;
+      setFeedback(shownMessage, 'bad');
+      updateSessionMeta();
+      updateScores();
+    }
+
+    function difficultyLabel(value) {
+      if (value === 'easy') return 'lahka';
+      if (value === 'hard') return 'težka';
+      return 'srednja';
+    }
+
+    function selectedTextInside(container) {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return null;
+      const range = selection.getRangeAt(0);
+      if (!container.contains(range.commonAncestorContainer)) return null;
+      return { selection, range, text: normalizeText(selection.toString()) };
+    }
+
+    function makeSelectionEditor(text, extraClass = '') {
+      const editor = document.createElement('div');
+      editor.className = 'text-editor' + (extraClass ? ' ' + extraClass : '');
+      editor.textContent = text;
+      editor.tabIndex = 0;
+      playArea.append(editor);
+      return editor;
+    }
+
+    function renderMenu() {
+      menuGrid.replaceChildren();
+      gameDefinitions.forEach((game, index) => {
+        const card = document.createElement('article');
+        card.className = 'game-card';
+        card.innerHTML =
+          '<span class="card-number">' + (index + 1) + '</span>' +
+          '<h2>' + game.title + '</h2>' +
+          '<p>' + game.description + '</p>' +
+          '<div class="card-bottom">' +
+            '<span class="card-score" data-card-score="' + game.id + '">Pravilno: ' + scores[game.id] + '</span>' +
+            '<button class="primary" type="button">Začni</button>' +
+          '</div>';
+        card.querySelector('button').addEventListener('click', () => startGame(game.id));
+        menuGrid.append(card);
+      });
+    }
+
+    function startGame(id) {
+      activeGame = gameDefinitions.find(game => game.id === id);
+      if (!activeGame) return;
+      currentConfig = readConfiguration();
+      document.body.dataset.difficulty = currentConfig.difficulty;
+      saveSettings();
+      sessionSolved = 0;
+      sessionErrors = 0;
+      mixedDeck = [];
+      menuView.hidden = true;
+      gameView.hidden = false;
+      taskContent.hidden = false;
+      resultPanel.hidden = true;
+      gameTitle.textContent = activeGame.title;
+      gameDescription.textContent = activeGame.description;
+      startTimer();
+      renderActiveTask();
+    }
+
+    function renderActiveTask() {
+      if (sessionSolved >= sessionTarget) {
+        finishSession(false);
+        return;
+      }
+      solved = false;
+      playArea.replaceChildren();
+      nextTaskButton.hidden = true;
+      mixedLabel.hidden = true;
+      window.getSelection()?.removeAllRanges();
+      setFeedback(currentConfig.mode === 'assessment' ? 'Reši nalogo.' : 'Reši nalogo z miško.');
+      updateSessionMeta();
+      updateScores();
+      activeGame.setup();
+    }
+
+    function returnToMenu() {
+      stopTimer();
+      activeGame = null;
+      currentConfig = null;
+      gameView.hidden = true;
+      menuView.hidden = false;
+      taskContent.hidden = false;
+      resultPanel.hidden = true;
+      window.getSelection()?.removeAllRanges();
+      renderMenu();
+      updateScores();
+    }
+
+    function finishSession(timedOut) {
+      if (!activeGame || resultPanel.hidden === false) return;
+      stopTimer();
+      solved = true;
+      taskContent.hidden = true;
+      resultPanel.hidden = false;
+      resultTitle.textContent = timedOut ? 'Čas je potekel' : 'Sklop je zaključen';
+      resultName.textContent = currentConfig.name + ' – ' + activeGame.title;
+      resultCorrect.textContent = sessionSolved + '/' + sessionTarget;
+      resultErrors.textContent = String(sessionErrors);
+      resultPercent.textContent = Math.round((sessionSolved / sessionTarget) * 100) + ' %';
+      resultTime.textContent = currentConfig.seconds > 0 ? formatTime(timeRemaining) : 'brez omejitve';
+    }
+
+    function restartSession() {
+      if (!activeGame) return;
+      sessionSolved = 0;
+      sessionErrors = 0;
+      mixedDeck = [];
+      taskContent.hidden = false;
+      resultPanel.hidden = true;
+      startTimer();
+      renderActiveTask();
+    }
+
+    function setupMixedGame() {
+      if (mixedDeck.length === 0) mixedDeck = shuffle(baseGameDefinitions);
+      const selectedGame = mixedDeck.pop();
+      mixedLabel.textContent = 'Trenutna vaja: ' + selectedGame.title;
+      mixedLabel.hidden = false;
+      selectedGame.setup();
+    }
+
+    function setupCaretGame() {
+      const sentence = randomItem(getSentencePool());
+      const words = wordsIn(sentence);
+      const gapIndex = Math.floor(Math.random() * (words.length - 1));
+      setInstruction('Klikni med besedi <span class="target-pill">' + words[gapIndex].text + '</span> in <span class="target-pill">' + words[gapIndex + 1].text + '</span>.');
+
+      const editor = document.createElement('div');
+      editor.className = 'caret-editor';
+      words.forEach((word, index) => {
+        const wordElement = document.createElement('span');
+        wordElement.className = 'caret-word';
+        wordElement.textContent = word.text + (index === words.length - 1 ? '.' : '');
+        editor.append(wordElement);
+
+        if (index < words.length - 1) {
+          const gap = document.createElement('button');
+          gap.type = 'button';
+          gap.className = 'gap';
+          gap.setAttribute('aria-label', 'Mesto med besedama ' + word.text + ' in ' + words[index + 1].text);
+          gap.addEventListener('click', () => {
+            if (solved) return;
+            if (index === gapIndex) {
+              gap.classList.add('correct');
+              finishTask();
+            } else {
+              wrong('Poskusi znova. Klikni natančno med zahtevani besedi.');
+            }
+          });
+          editor.append(gap);
+        }
+      });
+      playArea.append(editor);
+    }
+
+    function setupWordSelection() {
+      const sentence = randomItem(getSentencePool().filter(text =>
+        wordsIn(text).some(word => word.text.length >= 4)
+      ));
+      const candidates = wordsIn(sentence).filter(word => word.text.length >= 4);
+      const target = randomItem(candidates);
+      setInstruction('Z vlečenjem označi besedo <span class="target-pill">' + target.text + '</span>.');
+      const editor = makeSelectionEditor(sentence);
+
+      editor.addEventListener('mouseup', () => {
+        if (solved) return;
+        window.setTimeout(() => {
+          const result = selectedTextInside(editor);
+          if (!result) return;
+          if (result.text === target.text) finishTask();
+          else wrong('Poskusi znova. Označi samo zahtevano besedo.');
+        }, 0);
+      });
+    }
+
+    function setupPhraseSelection() {
+      const task = randomItem(getPhrasePool());
+      setInstruction('Označi besedno zvezo <span class="target-pill">' + task.phrase + '</span>.');
+      const editor = makeSelectionEditor(task.sentence);
+
+      editor.addEventListener('mouseup', () => {
+        if (solved) return;
+        window.setTimeout(() => {
+          const result = selectedTextInside(editor);
+          if (!result) return;
+          if (result.text === task.phrase) finishTask();
+          else wrong('Poskusi znova. Označi vse zahtevane besede in nič več.');
+        }, 0);
+      });
+    }
+
+    function setupRangeSelection() {
+      const task = randomItem(getPhrasePool());
+      const phraseWords = task.phrase.split(' ');
+      const first = phraseWords[0];
+      const last = phraseWords[phraseWords.length - 1];
+      setInstruction('Označi besedilo od besede <span class="target-pill">' + first + '</span> do besede <span class="target-pill">' + last + '</span>.');
+      const editor = makeSelectionEditor(task.sentence);
+
+      editor.addEventListener('mouseup', () => {
+        if (solved) return;
+        window.setTimeout(() => {
+          const result = selectedTextInside(editor);
+          if (!result) return;
+          if (result.text === task.phrase) finishTask();
+          else wrong('Poskusi znova. Začni pri prvi in končaj pri zadnji navedeni besedi.');
+        }, 0);
+      });
+    }
+
+    function setupDoubleClick() {
+      const sentence = randomItem(getSentencePool().filter(text =>
+        wordsIn(text).some(word => word.text.length >= 4)
+      ));
+      const words = wordsIn(sentence);
+      const candidates = words.filter(word => word.text.length >= 4);
+      const target = randomItem(candidates);
+      setInstruction('Z dvoklikom označi besedo <span class="target-pill">' + target.text + '</span>.');
+
+      const editor = document.createElement('div');
+      editor.className = 'text-editor';
+      let cursor = 0;
+      words.forEach(word => {
+        if (word.start > cursor) editor.append(document.createTextNode(sentence.slice(cursor, word.start)));
+        const span = document.createElement('span');
+        span.className = 'double-word';
+        span.textContent = word.text;
+        span.addEventListener('dblclick', event => {
+          event.preventDefault();
+          if (solved) return;
+          if (word.index === target.index) {
+            span.classList.add('correct');
+            finishTask();
+          } else {
+            wrong('Poskusi znova. Dvoklikni zahtevano besedo.');
+          }
+        });
+        editor.append(span);
+        cursor = word.end;
+      });
+      if (cursor < sentence.length) editor.append(document.createTextNode(sentence.slice(cursor)));
+      playArea.append(editor);
+    }
+
+    function setupMoveWord() {
+      const sentence = randomItem(getSentencePool().filter(text =>
+        wordsIn(text).some(word => word.text.length >= 4)
+      ));
+      const words = wordsIn(sentence);
+      const sourceCandidates = words.filter(word => word.text.length >= 4);
+      const source = randomItem(sourceCandidates);
+      const target = randomItem(words.filter(word => word.index !== source.index));
+      const position = Math.random() < 0.5 ? 'pred' : 'za';
+      setInstruction('Označi besedo <span class="target-pill">' + source.text + '</span> in jo povleci <strong>' + position + '</strong> besedo <span class="target-pill">' + target.text + '</span>.');
+
+      const editor = document.createElement('div');
+      editor.className = 'text-editor';
+      let cursor = 0;
+      let sourceElement = null;
+      let dropZone = null;
+      let validDrag = false;
+
+      words.forEach(word => {
+        if (word.start > cursor) editor.append(document.createTextNode(sentence.slice(cursor, word.start)));
+        if (word.index === target.index && position === 'pred') {
+          dropZone = createDropZone();
+          editor.append(dropZone);
+        }
+        const span = document.createElement('span');
+        span.className = 'word';
+        span.textContent = word.text;
+        if (word.index === source.index) sourceElement = span;
+        editor.append(span);
+        if (word.index === target.index && position === 'za') {
+          dropZone = createDropZone();
+          editor.append(dropZone);
+        }
+        cursor = word.end;
+      });
+      if (cursor < sentence.length) editor.append(document.createTextNode(sentence.slice(cursor)));
+      playArea.append(editor);
+
+      function correctSourceSelection() {
+        const result = selectedTextInside(editor);
+        return Boolean(result && result.text === source.text && result.range.intersectsNode(sourceElement));
+      }
+
+      editor.addEventListener('mouseup', () => {
+        if (solved) return;
+        window.setTimeout(() => {
+          const selection = window.getSelection();
+          if (!selection || selection.isCollapsed) return;
+          if (correctSourceSelection()) setFeedback('Pravilno označeno. Zdaj besedo povleci v polje »Spusti sem«.', 'good');
+          else wrong('Poskusi znova. Najprej označi samo zahtevano besedo.');
+        }, 0);
+      });
+
+      editor.addEventListener('dragstart', event => {
+        validDrag = !solved && correctSourceSelection();
+        if (!validDrag) {
+          event.preventDefault();
+          wrong('Najprej pravilno označi zahtevano besedo.');
+          return;
+        }
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', source.text);
+      });
+
+      dropZone.addEventListener('dragover', event => {
+        if (!validDrag || solved) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'move';
+        dropZone.classList.add('ready');
+      });
+
+      dropZone.addEventListener('dragleave', () => dropZone.classList.remove('ready'));
+      dropZone.addEventListener('drop', event => {
+        if (!validDrag || solved) return;
+        event.preventDefault();
+        dropZone.classList.remove('ready');
+        if (normalizeText(event.dataTransfer.getData('text/plain')) !== source.text) {
+          wrong();
+          return;
+        }
+        dropZone.className = 'drop-zone done';
+        dropZone.textContent = source.text;
+        sourceElement.classList.add('source-moved');
+        window.getSelection()?.removeAllRanges();
+        finishTask();
+      });
+      editor.addEventListener('dragend', () => {
+        validDrag = false;
+        dropZone.classList.remove('ready');
+      });
+    }
+
+    function createDropZone() {
+      const zone = document.createElement('span');
+      zone.className = 'drop-zone';
+      zone.textContent = 'Spusti sem';
+      zone.setAttribute('aria-label', 'Mesto za spuščanje besede');
+      return zone;
+    }
+
+    function setupScrollSelection() {
+      const target = randomItem(getScrollTargets());
+      setInstruction('Z drsnikom poišči in označi besedo <span class="target-pill">' + target.word + '</span>.');
+
+      const editor = document.createElement('div');
+      editor.className = 'text-editor scroll-editor';
+      editor.tabIndex = 0;
+      const sentencePool = getSentencePool().filter(sentence => sentence !== target.sentence);
+      const fillers = shuffle(sentencePool).slice(0, 8);
+      [...fillers, target.sentence, ...shuffle(sentencePool).slice(0, 3)].forEach(text => {
+        const paragraph = document.createElement('p');
+        paragraph.textContent = text;
+        editor.append(paragraph);
+      });
+      playArea.append(editor);
+
+      editor.addEventListener('mouseup', () => {
+        if (solved) return;
+        window.setTimeout(() => {
+          const result = selectedTextInside(editor);
+          if (!result) return;
+          if (result.text === target.word) finishTask();
+          else wrong('Poskusi znova. Poišči in označi samo zahtevano besedo.');
+        }, 0);
+      });
+    }
+
+    function setupWordOrder() {
+      const correctWords = [...randomItem(getOrderPool())];
+      let shuffledWords = shuffle(correctWords);
+      while (shuffledWords.every((word, index) => word === correctWords[index])) {
+        shuffledWords = shuffle(correctWords);
+      }
+      setInstruction('Besede povleci v spodnja polja in sestavi pravilno poved.');
+
+      const bankLabel = document.createElement('p');
+      bankLabel.className = 'order-label';
+      bankLabel.textContent = 'Pomešane besede';
+      const bank = document.createElement('div');
+      bank.className = 'word-bank';
+
+      const slotsLabel = document.createElement('p');
+      slotsLabel.className = 'order-label';
+      slotsLabel.textContent = 'Pravilna poved';
+      const slots = document.createElement('div');
+      slots.className = 'word-slots';
+      const placed = new Array(correctWords.length).fill(false);
+
+      shuffledWords.forEach((word, cardIndex) => {
+        const card = document.createElement('span');
+        card.className = 'word-card';
+        card.textContent = word;
+        card.draggable = true;
+        card.dataset.cardIndex = String(cardIndex);
+        card.addEventListener('dragstart', event => {
+          if (solved) {
+            event.preventDefault();
+            return;
+          }
+          event.dataTransfer.effectAllowed = 'move';
+          event.dataTransfer.setData('text/plain', String(cardIndex));
+        });
+        bank.append(card);
+      });
+
+      correctWords.forEach((word, slotIndex) => {
+        const slot = document.createElement('span');
+        slot.className = 'word-slot';
+        slot.textContent = String(slotIndex + 1);
+        slot.addEventListener('dragover', event => {
+          if (solved || placed[slotIndex]) return;
+          event.preventDefault();
+          slot.classList.add('ready');
+        });
+        slot.addEventListener('dragleave', () => slot.classList.remove('ready'));
+        slot.addEventListener('drop', event => {
+          if (solved || placed[slotIndex]) return;
+          event.preventDefault();
+          slot.classList.remove('ready');
+          const cardIndex = Number(event.dataTransfer.getData('text/plain'));
+          const card = bank.querySelector('[data-card-index="' + cardIndex + '"]');
+          if (!card) return;
+          if (card.textContent !== word) {
+            wrong('Ta beseda ne sodi na to mesto. Poskusi znova.');
+            return;
+          }
+          placed[slotIndex] = true;
+          slot.classList.add('filled');
+          slot.textContent = word;
+          card.remove();
+          if (placed.every(Boolean)) finishTask('Odlično! Poved je pravilno sestavljena.');
+          else setFeedback('Pravilno. Nadaljuj z naslednjo besedo.', 'good');
+        });
+        slots.append(slot);
+      });
+
+      playArea.append(bankLabel, bank, slotsLabel, slots);
+    }
+
+    nextTaskButton.addEventListener('click', () => {
+      if (sessionSolved >= sessionTarget) finishSession(false);
+      else renderActiveTask();
+    });
+    menuButton.addEventListener('click', returnToMenu);
+    repeatButton.addEventListener('click', restartSession);
+    resultMenuButton.addEventListener('click', returnToMenu);
+    [playerNameInput, difficultySelect, playModeSelect, timeModeSelect, customSentencesInput].forEach(control => {
+      control.addEventListener('change', saveSettings);
+    });
+    customSentencesInput.addEventListener('input', () => {
+      updateSentenceCount();
+      saveSettings();
+    });
+    loadSettings();
+    updateSentenceCount();
+    renderMenu();
+    updateScores();
+  </script>
+</body>
+</html>
